@@ -24,7 +24,7 @@ public class AccountService {
 
         DebitAccountEntity sourceAccount, targetAccount;
 
-        // keeping the order of locking the accounts by number in order to avoid deadlocks
+        /*** Keeping the order of locking the accounts by number in order to avoid deadlocks */
         if (sourceAccountId < targetAccountId) {
             sourceAccount = findByIdForUpdate(sourceAccountId);
             targetAccount = findByIdForUpdate(targetAccountId);
@@ -33,7 +33,7 @@ public class AccountService {
             sourceAccount = findByIdForUpdate(sourceAccountId);
         }
 
-        // further validations
+        /*** further validations */
         checkNotNull(sourceAccount, "Source account not found. id=" + sourceAccountId);
         checkNotNull(targetAccount, "Target account not found. id=" + targetAccount);
         checkIsTrue(BigDecimal.ZERO.compareTo(amount) < 0, "Incorrect amount. You may transfer only positive non zero value.");
