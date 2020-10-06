@@ -1,6 +1,6 @@
-##Design and implement a RESTful API (including data model and the backing implementation) for money transfers between accounts.
+## Design and implement a RESTful API (including data model and the backing implementation) for money transfers between accounts.
 
-###Explicit requirements:
+### Explicit requirements:
 1. You can use Java or Kotlin.
 2. Keep it simple and to the point (e.g. no need to implement any authentication).
 3. Assume the API is invoked by multiple systems and services on behalf of end users.
@@ -11,14 +11,14 @@ requirement #2 and keep it simple and avoid heavy frameworks.
 pre-installed container/server).
 7. Demonstrate with tests that the API works as expected.
 
-###Implicit requirements:
+### Implicit requirements:
 1. The code produced by you is expected to be of high quality.
 2. There are no detailed requirements, use common sense.
 
 ---
-##Implementation considerations driven by requirements
+## Implementation considerations driven by requirements
 
-###Explicit requirements decisions:
+### Explicit requirements decisions:
 1. Java implementation has been chosen (OpenJDK 11)
 2.4. Group of requirements regarding the tools/frameworks to be used and not used (spring) give a wide variation 
 of possible items for usage: Play, Quarkus, Micronaut, Ktor (if Kotlin), Vert.x etc. All of the
@@ -34,7 +34,7 @@ was abandoned according to point 2.
 6. Application is packed as standalone 'single JAR' application (prerequisites - only java 11 installed).
 7. Integration tests against REST API are written.
 
-###General implementation points:
+### General implementation points:
 1. Code was structured according to usual practices with package separation by application 'layer/domain'.
 2. Simplicity principle was used as general rule: simple namings (commonly adopted), classes separation, 
 no extra interfaces (if not specially needed), etc.
@@ -46,8 +46,8 @@ The async option will be more efficient and modern but less readable and obvious
 HttpClient was used for implementation against the application RESTs to cover obvious corner and usual scenarios.
 Low level unit tests was abandoned as 'code waste' thing for the current system complexity.
 
-#Application build and run
-###Build
+# Application build and run
+### Build
 Install latest available maven 3 on the system path.
 Install latest available open jdk 11 on the system path.
 
@@ -55,12 +55,12 @@ Install latest available open jdk 11 on the system path.
 
 mvn clean install
 
-###Run
+### Run
 cd [project root dir]/target
 
 java -jar transfers-0.1.jar
 
-###Usage
+### Usage
 Utility REST endpoints:
 
 POST /account {} - open new account with a zero balance
