@@ -1,62 +1,86 @@
 package org.tb.transfer.service;
 
 import org.tb.transfer.domain.DebitAccountEntity;
+import org.tb.transfer.domain.exception.NotFoundException;
+import org.tb.transfer.domain.exception.ValidationException;
 import org.tb.transfer.repo.AccountRepo;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.Objects;
 
 @Singleton
+@Transactional
 public class AccountService {
     @Inject
     private AccountRepo repo;
 
-    @Transactional
-    public void transfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount) {
-        Objects.requireNonNull(sourceAccountId);
-        Objects.requireNonNull(targetAccountId);
-        Objects.requireNonNull(amount);
-        if (sourceAccountId.equals(targetAccountId)) {
-            throw new IllegalArgumentException("Source and target accounts must not be the same.");
-        }
+    public void transfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount) throws ValidationException, NotFoundException {
+        checkNotNull(sourceAccountId, "Source account must not be null");
+        checkNotNull(targetAccountId, "Target account must not be null");
+        checkNotNull(amount, "Amount account must not be null");
+        checkIsTrue(!sourceAccountId.equals(targetAccountId), "Source and target accounts must not be the same.");
 
         DebitAccountEntity sourceAccount, targetAccount;
 
         // keeping the order of locking the accounts by number in order to avoid deadlocks
         if (sourceAccountId < targetAccountId) {
-            sourceAccount = repo.findByIdForUpdate(sourceAccountId);
-            targetAccount = repo.findByIdForUpdate(targetAccountId);
+            sourceAccount = findByIdForUpdate(sourceAccountId);
+            targetAccount = findByIdForUpdate(targetAccountId);
         } else {
-            targetAccount = repo.findByIdForUpdate(targetAccountId);
-            sourceAccount = repo.findByIdForUpdate(sourceAccountId);
+            targetAccount = findByIdForUpdate(targetAccountId);
+            sourceAccount = findByIdForUpdate(sourceAccountId);
         }
 
         // further validations
-        Objects.requireNonNull(sourceAccount, "Transfer source account not found. id=" + sourceAccountId);
-        Objects.requireNonNull(targetAccount, "Transfer target account not found. id=" + targetAccount);
-
-        if (BigDecimal.ZERO.compareTo(amount) >= 0) {
-            throw new IllegalArgumentException("Incorrect amount. You may transfer only positive non zero value.");
-        }
-
-        if (sourceAccount.getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Not enough money at the source account.");
-        }
+        checkNotNull(sourceAccount, "Source account not found. id=" + sourceAccountId);
+        checkNotNull(targetAccount, "Target account not found. id=" + targetAccount);
+        checkIsTrue(BigDecimal.ZERO.compareTo(amount) < 0, "Incorrect amount. You may transfer only positive non zero value.");
+        checkIsTrue(sourceAccount.getBalance().compareTo(amount) >= 0, "Insufficient funds at the source account.");
 
         BigDecimal newSourceBalance = sourceAccount.getBalance().subtract(amount);
         BigDecimal newTargetBalance = targetAccount.getBalance().add(amount);
         sourceAccount.setBalance(newSourceBalance);
         targetAccount.setBalance(newTargetBalance);
-        repo.save(sourceAccount);
-        repo.save(targetAccount);
+        repo.update(sourceAccount);
+        repo.update(targetAccount);
     }
 
     public DebitAccountEntity findById(Long id) {
         return repo.findById(id).orElseThrow(() -> {
-            throw new IllegalArgumentException("Account not found with id=" + id);
+            throw new NotFoundException("Account not found with id=" + id);
         });
     }
+
+    public boolean updateAccountBalance(Long id, BigDecimal balance) {
+        return repo.findById(id)
+                .map(e -> e.setBalance(balance))
+                .map(repo::update)
+                .isPresent();
+    }
+
+    public DebitAccountEntity openAccount() {
+        DebitAccountEntity e = new DebitAccountEntity()
+                .setBalance(BigDecimal.ZERO);
+        return repo.save(e);
+    }
+
+    public DebitAccountEntity findByIdForUpdate(Long id) {
+        return repo.findByIdForUpdate(id).orElseThrow(() -> {
+            throw new NotFoundException("Account not found with id=" + id);
+        });
+    }
+
+    private static void checkNotNull(Object obj, String msg) {
+        checkIsTrue(obj != null, msg);
+    }
+
+    private static void checkIsTrue(boolean condition, String msg) {
+        if (!condition) {
+            throw new ValidationException(msg);
+        }
+    }
+
+
 }

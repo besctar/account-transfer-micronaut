@@ -1,8 +1,9 @@
 package org.tb.transfer.rest.dto;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class TransferRequest {
+public class TransferRequest implements Serializable {
     private Long sourceAccountId;
     private Long targetAccountId;
     private BigDecimal amount;

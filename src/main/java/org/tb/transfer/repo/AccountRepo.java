@@ -1,12 +1,13 @@
 package org.tb.transfer.repo;
 
-import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.jdbc.annotation.JdbcRepository;
+import io.micronaut.data.model.query.builder.sql.Dialect;
 import io.micronaut.data.repository.CrudRepository;
 import org.tb.transfer.domain.DebitAccountEntity;
 
-@Repository
-public interface AccountRepo extends CrudRepository<DebitAccountEntity, Long> {
+import java.util.Optional;
 
-    // Micronaut pessimistic lock feature - 'forUpdate' suffix
-    DebitAccountEntity findByIdForUpdate(Long id);
+@JdbcRepository(dialect = Dialect.H2)
+public interface AccountRepo extends CrudRepository<DebitAccountEntity, Long> {
+    Optional<DebitAccountEntity> findByIdForUpdate(Long id);
 }

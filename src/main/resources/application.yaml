@@ -7,7 +7,7 @@ micronaut:
     port: 8080
 datasources:
   default:
-    url: jdbc:h2:mem:devDb
+    url: jdbc:h2:mem:devDb;INIT=RUNSCRIPT FROM 'classpath:init.sql';DB_CLOSE_DELAY=-1;
     driverClassName: org.h2.Driver
     username: sa
     password: ''
